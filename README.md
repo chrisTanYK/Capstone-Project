@@ -17,7 +17,7 @@ Configurable high-risk keywords that trigger alerts (e.g., "high_risk", "fraudul
 
 Email subscription for security team notifications
 
-Debug mode available for testing (FORCE_SNS_PUBLISH)
+Debug mode available for testing (SNS_PUBLISH)
 
 3. Data Persistence
 Amazon DynamoDB table for storing all fraud detection events and outcomes
