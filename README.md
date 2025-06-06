@@ -1,4 +1,4 @@
-![ Image 2025-06-06 at 1 42 16 PM](https://github.com/user-attachments/assets/e54c9b9a-3d83-409e-aed0-36236687505b)
+(https://github.com/user-attachments/assets/e54c9b9a-3d83-409e-aed0-36236687505b)
 
 Fraud Detection System - Project Description
 Overview
