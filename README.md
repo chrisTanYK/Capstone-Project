@@ -34,6 +34,7 @@ RESTful POST endpoint at /predict
 CORS-enabled for cross-origin access
 
 Technical Architecture
+
 The system follows a serverless architecture with these key AWS services:
 
 AWS Lambda for the core fraud detection logic
@@ -57,7 +58,7 @@ Scalable: Serverless architecture automatically scales with demand
 
 Secure: IAM role-based permissions for all components
 
-Use Cases
+Use Cases:
 New user registration fraud detection
 
 Account takeover prevention
@@ -66,10 +67,10 @@ Suspicious activity monitoring
 
 Compliance reporting for fraud events
 
-Deployment
+Deployment:
 The system is deployed using AWS SAM (Serverless Application Model) with infrastructure-as-code for reliable and repeatable provisioning.
 
-Monitoring
+Monitoring:
 All components integrate with AWS CloudWatch for logging and monitoring, providing visibility into:
 
 API request volumes
