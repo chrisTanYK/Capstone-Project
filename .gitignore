@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# SAM
+.aws-sam/
+samconfig.toml
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+Thumbs.db
