@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Fraud Detection SAM App
+Resources:
+  HighRiskSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: HighRiskAlertsTopic-v3
+  HighRiskSnsTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+      - Ref: HighRiskSnsTopic
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowSpecificLambdaPublish
+          Effect: Allow
+          Principal:
+            AWS:
+              Fn::GetAtt:
+              - FraudCheckerFunctionRole
+              - Arn
+          Action: sns:Publish
+          Resource:
+            Ref: HighRiskSnsTopic
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Ref: HighRiskSnsTopic
+      Protocol: email
+      Endpoint: ykchristan82@gmail.com
+  FraudCheckerFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: FraudCheckerInlinePolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:PutItem
+            - frauddetector:GetEventPrediction
+            - sns:Publish
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: '*'
+  FraudApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: '''POST,OPTIONS'''
+        AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+        AllowOrigin: '''*'''
+  FraudCheckerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: FraudCheckerFunction
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Role:
+        Fn::GetAtt:
+        - FraudCheckerFunctionRole
+        - Arn
+      Environment:
+        Variables:
+          FRAUD_EVENTS_TABLE:
+            Ref: FraudEventsTable
+          HIGH_RISK_SNS_TOPIC_ARN:
+            Ref: HighRiskSnsTopic
+      Events:
+        PredictApi:
+          Type: Api
+          Properties:
+            Path: /predict
+            Method: post
+            RestApiId:
+              Ref: FraudApi
+    Metadata:
+      SamResourceId: FraudCheckerFunction
+  FraudCheckerApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        Ref: FraudCheckerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${FraudApi}/*/POST/predict
+  FraudEventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: FraudEvents-v3
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: eventId
+        AttributeType: S
+      KeySchema:
+      - AttributeName: eventId
+        KeyType: HASH
+Outputs:
+  PredictApiUrl:
+    Description: API Gateway URL
+    Value:
+      Fn::Sub: https://${FraudApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/predict
+  SnsTopicArn:
+    Description: SNS Topic ARN
+    Value:
+      Ref: HighRiskSnsTopic
+  SnsTopicName:
+    Description: SNS Topic Name
+    Value:
+      Fn::GetAtt:
+      - HighRiskSnsTopic
+      - TopicName
