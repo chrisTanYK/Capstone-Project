@@ -1,4 +1,5 @@
-(https://github.com/user-attachments/assets/e54c9b9a-3d83-409e-aed0-36236687505b)
+![image](https://github.com/user-attachments/assets/cae90646-86eb-40f9-81de-86d570d4231d)
+
 
 Fraud Detection System - Project Description
 Overview
